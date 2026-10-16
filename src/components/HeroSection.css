@@ -1,0 +1,268 @@
+.hero-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 640px;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding-top: calc(var(--nav-height) + 24px);
+}
+
+.hero-stage__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  max-width: var(--max-width);
+  z-index: 2;
+  margin-bottom: 90px;
+}
+
+/* Eyebrow Label */
+.hero-stage__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+}
+
+.eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-truck-cab);
+}
+
+/* Editorial Headline */
+.hero-stage__headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6.2vw, 5.25rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--color-text-primary);
+  text-transform: lowercase;
+  margin: 0 0 24px 0;
+  max-width: 950px;
+  position: relative;
+  word-break: break-word;
+}
+
+.hero-stage__typed {
+  color: var(--color-text-primary);
+}
+
+/* Typing Cursor */
+.hero-stage__cursor {
+  display: inline-block;
+  width: 2.5px;
+  height: 0.88em;
+  background-color: var(--color-text-primary);
+  margin-left: 3px;
+  vertical-align: -0.05em;
+  animation: cursorBlink 0.8s steps(2, start) infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Ghost text keeps height stable for zero CLS */
+.hero-stage__ghost {
+  opacity: 0;
+  visibility: hidden;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Subtext & Corridor */
+.hero-stage__subtext {
+  font-size: clamp(1rem, 1.4vw, 1.1875rem);
+  color: var(--color-text-secondary);
+  max-width: 620px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-stage__subtext.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-stage__corridor {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  padding: 8px 16px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.hero-stage__corridor.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.corridor-point {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.corridor-arrow {
+  color: var(--color-truck-cab);
+  font-weight: 600;
+}
+
+.corridor-via {
+  color: var(--color-text-muted);
+}
+
+/* Pinned Track & Road */
+.hero-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  pointer-events: none;
+}
+
+.hero-track__road {
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.hero-track__road-line {
+  width: 100%;
+  height: 1.5px;
+  background-color: var(--color-border-subtle);
+}
+
+/* Truck Wrapper sitting right on top of the road line */
+.hero-track__truck-wrapper {
+  position: absolute;
+  bottom: 50px; /* Tire contact line */
+  right: max(24px, 5vw);
+  width: 160px;
+  height: 50px;
+  will-change: transform;
+}
+
+.hero-track__truck-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Decoupled Wheel Assemblies */
+.wheel-mount,
+.wheel-spin {
+  pointer-events: none;
+}
+
+/* Scroll Hint */
+.hero-track__scroll-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.3s;
+}
+
+.hero-track__scroll-hint.is-ready {
+  opacity: 1;
+}
+
+.scroll-hint-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.scroll-hint-line {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border-subtle);
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-hint-dot {
+  display: block;
+  width: 1px;
+  height: 8px;
+  background: var(--color-text-primary);
+  animation: scrollDrop 1.8s ease-in-out infinite;
+}
+
+@keyframes scrollDrop {
+  0% { transform: translateY(-100%); }
+  50% { transform: translateY(150%); }
+  100% { transform: translateY(250%); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .hero-stage {
+    min-height: 580px;
+  }
+
+  .hero-stage__content {
+    margin-bottom: 100px;
+  }
+
+  .hero-track {
+    height: 110px;
+  }
+
+  .hero-track__road {
+    bottom: 40px;
+  }
+
+  .hero-track__truck-wrapper {
+    bottom: 40px;
+    width: 120px;
+    height: 37.5px;
+    right: 20px;
+  }
+
+  .hero-stage__corridor {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    gap: 6px;
+  }
+
+  .hero-track__scroll-hint {
+    bottom: 8px;
+  }
+}

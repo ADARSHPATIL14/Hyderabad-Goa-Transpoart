@@ -1,0 +1,159 @@
+.route-section {
+  background-color: var(--color-bg);
+}
+
+.route-header {
+  max-width: 680px;
+  margin-bottom: 64px;
+}
+
+.route-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 3.8vw, 3.25rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--color-text-primary);
+  margin-bottom: 20px;
+}
+
+.route-subtitle {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.corridor-track {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 28px;
+}
+
+@media (min-width: 900px) {
+  .corridor-track {
+    flex-direction: row;
+    gap: 0;
+    align-items: flex-start;
+  }
+}
+
+.corridor-node {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+@media (min-width: 900px) {
+  .corridor-node {
+    flex-direction: column;
+    gap: 20px;
+    padding-right: 24px;
+  }
+}
+
+.corridor-node__marker-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+@media (min-width: 900px) {
+  .corridor-node__marker-wrap {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+.corridor-node__dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-focus);
+  background-color: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.corridor-node__dot.is-terminal {
+  border-color: var(--color-truck-cab);
+  background-color: var(--color-truck-cab);
+}
+
+.inner-pulse {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--color-border-focus);
+}
+
+.corridor-node__dot.is-terminal .inner-pulse {
+  background-color: #FFFFFF;
+}
+
+.corridor-node__connector {
+  position: absolute;
+  background-color: var(--color-border-subtle);
+  z-index: 1;
+}
+
+/* Vertical connector on mobile */
+@media (max-width: 899px) {
+  .corridor-node__connector {
+    width: 1.5px;
+    top: 18px;
+    bottom: -28px;
+    left: 7.25px;
+  }
+}
+
+/* Horizontal connector on desktop */
+@media (min-width: 900px) {
+  .corridor-node__connector {
+    height: 1.5px;
+    left: 16px;
+    right: 0;
+    top: 7.25px;
+  }
+}
+
+.corridor-node__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.corridor-node__state {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.corridor-node__city {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.corridor-node__type {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--color-truck-cab);
+  margin-bottom: 4px;
+}
+
+.corridor-node__detail {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
