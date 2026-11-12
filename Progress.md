@@ -92,11 +92,63 @@ The implementation was rigorously verified using the browser subagent across for
 
 ---
 
-## 5. Visual Artifacts
-- **Browser Session Recording**: [verify_pure_wheel_spin_1792147950463.webp](file:///C:/Users/ADARSH%20PATIL/.gemini/antigravity-ide/brain/c85e74b5-7b56-43ab-9504-0367bd270ef7/verify_pure_wheel_spin_1792147950463.webp)
-- **Desktop Scroll 0px**: [media_1792147963299.png](file:///C:/Users/ADARSH%20PATIL/.gemini/antigravity-ide/brain/c85e74b5-7b56-43ab-9504-0367bd270ef7/.tempmediaStorage/media_1792147963299.png)
-- **Desktop Scroll 400px**: [media_1792147980227.png](file:///C:/Users/ADARSH%20PATIL/.gemini/antigravity-ide/brain/c85e74b5-7b56-43ab-9504-0367bd270ef7/.tempmediaStorage/media_1792147980227.png)
-- **Desktop Scroll 800px**: [media_1792147986317.png](file:///C:/Users/ADARSH%20PATIL/.gemini/antigravity-ide/brain/c85e74b5-7b56-43ab-9504-0367bd270ef7/.tempmediaStorage/media_1792147986317.png)
-- **Desktop Scroll 1200px**: [media_1792147993417.png](file:///C:/Users/ADARSH%20PATIL/.gemini/antigravity-ide/brain/c85e74b5-7b56-43ab-9504-0367bd270ef7/.tempmediaStorage/media_1792147993417.png)
-- **Reverse Scroll to 0px**: [media_1792148001691.png](file:///C:/Users/ADARSH%20PATIL/.gemini/antigravity-ide/brain/c85e74b5-7b56-43ab-9504-0367bd270ef7/.tempmediaStorage/media_1792148001691.png)
+## 6. Comprehensive QA & Quality Hardening (Priority Execution)
+
+Following automated headless Chrome testing (CDP), DOM geometry analysis, and linter audits, the following priority improvements were implemented and verified:
+
+### A. High Priority Fixes
+1. **Route Coverage Continuous Pipeline ([RouteCoverage.css](file:///c:/Users/ADARSH%20PATIL/Desktop/HGT/src/components/RouteCoverage.css))**:
+   - Adjusted connector span to `right: -24px` on desktop viewports.
+   - Eliminated the 24px visual gap between nodes, connecting all 5 corridor waypoints into a continuous pipeline (`connRight = nextDotLeft = 387.3px`).
+2. **Dynamic Wheel Rotation on Viewport Resize ([HeroSection.tsx](file:///c:/Users/ADARSH%20PATIL/Desktop/HGT/src/components/HeroSection.tsx))**:
+   - Refactored wheel angle to a dynamic closure (`angle: () => -metrics.rotationDeg`).
+   - Integrated dynamic recalculation inside `ScrollTrigger.onRefresh` so truck travel and wheel rotation remain mathematically synchronized on device rotation and window resizing.
+3. **Contact Form Route Data Alignment ([ContactSection.tsx](file:///c:/Users/ADARSH%20PATIL/Desktop/HGT/src/components/ContactSection.tsx))**:
+   - Standardized corridor direction values to `"Hyderabad → Goa"`, `"Goa → Hyderabad"`, and `"En-Route Station (Hubballi / Belagavi)"`.
+   - Cleaned up dead/orphaned state (`destination`) and ensured full consignment details and routes pass cleanly into WhatsApp and email handlers.
+
+### B. Medium Priority Fixes
+4. **HGT Brand Favicon & Head Link ([favicon.svg](file:///c:/Users/ADARSH%20PATIL/Desktop/HGT/public/favicon.svg) & [index.html](file:///c:/Users/ADARSH%20PATIL/Desktop/HGT/index.html))**:
+   - Designed a custom SVG favicon featuring the HGT red cab silhouette, slate body, monogram, and road line.
+   - Fixed head icon link to point to `/favicon.svg`.
+5. **Mobile Drawer Accessibility ([Header.tsx](file:///c:/Users/ADARSH%20PATIL/Desktop/HGT/src/components/Header.tsx))**:
+   - Added `Escape` key event listener to dismiss the mobile drawer.
+   - Added automatic body scroll locking (`overflow: hidden`) when the drawer is open and clean restoration on dismissal.
+
+---
+
+## 7. Large Faded Freight Truck Implementation (MP4 Reference Alignment)
+
+Successfully replaced the legacy small bottom-right truck with the large faded European commercial semi-trailer truck modeled directly on the motion reference video `HGT_truck_smoother_right_to_left.mp4`.
+
+### A. Asset & Architecture Changes
+1. **Removed Obsolete Small Truck & Road**:
+   - Deleted `TruckAsset.tsx` and all obsolete SVG mudguard/wheel group CSS rules.
+   - Removed `.hero-track__road` and `.hero-track__truck-wrapper` styles.
+2. **Integrated High-Resolution Commercial Semi-Trailer Asset**:
+   - Assembled and cropped the high-res European tractor unit + full curtainside trailer (`src/assets/hgt_truck_large.png`, 1204 × 334 px).
+   - Rendered in a dedicated background layer (`.hero-large-truck-layer`) at `z-index: 1`, strictly behind the foreground editorial text at `z-index: 2`/`3`.
+3. **Calibrated Visual Opacity & Text Readability**:
+   - **Desktop/Tablet Opacity**: `0.28` with `mix-blend-mode: multiply` on white `#FFFFFF` canvas.
+   - **Mobile Opacity**: `0.24` for optimized compact screen contrast.
+   - The Didone headline `"welcome to hyderabad goa transport"` achieves a contrast ratio of >14:1, maintaining 100% effortless legibility while showcasing the vehicle scale.
+4. **ScrollTrigger Motion Choreography**:
+   - **Typing Phase**: Truck remains stationary near the right viewport boundary while the typewriter intro sequence completes.
+   - **Scroll Phase**: Seamlessly scrubs right-to-left across the hero stage as the user scrolls towards the About section (`start: 'top top'`, `end: 'bottom top'`, `scrub: 1.2`).
+   - **Exit Condition**: Completely exits past the left edge ($X < -(W_{\text{truck}} + 80)$).
+   - **Reverse Scrub**: Scrolling back to top smoothly brings the truck back toward the right.
+   - **Reduced Motion**: Fallback presents the truck statically with zero scroll animation.
+
+### B. Verification Matrix (Automated Headless Chrome CDP)
+
+| Test Item | Viewport | Start Position | Mid-Scroll Position | End Position | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Desktop 1440px** | 1440 × 900 | $X = 1224\text{px}$ (Right Edge) | $X = 91.5\text{px}$ (Scroll 450px) | $X = -1054\text{px}$ (Exited Left) | **PASSED** |
+| **Reverse Scroll** | 1440 × 900 | $X = -1054\text{px}$ | Progressive reversal | $X = 1217.5\text{px}$ (Restored) | **PASSED** |
+| **Laptop 1024px** | 1024 × 768 | Proportional scale | Fluid translation | Clean left exit | **PASSED** |
+| **Tablet 768px** | 768 × 1024 | Proportional scale | Fluid translation | Clean left exit | **PASSED** |
+| **Mobile 375px** | 375 × 667 | Contained | Smooth scrub | $0\text{px}$ overflow (`scrollWidth = clientWidth`) | **PASSED** |
+| **Reduced Motion** | Any | $X = 0\text{px}$ (Static) | Static | Static | **PASSED** |
+| **Console Errors** | All | 0 errors | 0 warnings | 0 leaks | **PASSED** |
+| **Production Build**| All | `tsc -b && vite build` in 262ms | 0 errors | Clean bundle | **PASSED** |
 

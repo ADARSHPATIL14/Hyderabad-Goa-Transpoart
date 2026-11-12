@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './RouteCoverage.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface Waypoint {
   city: string;
@@ -42,8 +46,45 @@ const ROUTE_WAYPOINTS: Waypoint[] = [
 ];
 
 export const RouteCoverage: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isReduced) return;
+
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%',
+          once: true,
+        },
+      });
+
+      tl.from('.route-header > *', {
+        opacity: 0,
+        y: 24,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power2.out',
+      })
+      .from('.corridor-node', {
+        opacity: 0,
+        y: 28,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power2.out',
+      }, '-=0.3');
+    }, el);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="coverage" className="section route-section">
+    <section id="coverage" className="section route-section" ref={sectionRef}>
       <div className="container">
         <div className="route-header">
           <span className="section-eyebrow">Corridor Architecture</span>

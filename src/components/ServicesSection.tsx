@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './ServicesSection.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ServiceItem {
   number: string;
@@ -45,8 +49,45 @@ const SERVICES: ServiceItem[] = [
 ];
 
 export const ServicesSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isReduced) return;
+
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%',
+          once: true,
+        },
+      });
+
+      tl.from('.services-header > *', {
+        opacity: 0,
+        y: 24,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power2.out',
+      })
+      .from('.service-card', {
+        opacity: 0,
+        y: 30,
+        duration: 0.75,
+        stagger: 0.15,
+        ease: 'power2.out',
+      }, '-=0.3');
+    }, el);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="services" className="section services-section">
+    <section id="services" className="section services-section" ref={sectionRef}>
       <div className="container">
         <div className="services-header">
           <div className="services-header__left">

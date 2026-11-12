@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { TruckAsset } from './TruckAsset';
+import hgtTruckLarge from '../assets/hgt_truck_large.png';
 import './HeroSection.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -9,29 +9,23 @@ gsap.registerPlugin(ScrollTrigger);
 const FULL_TEXT = 'welcome to hyderabad goa transport';
 
 export const HeroSection: React.FC = () => {
-  const [displayedCount, setDisplayedCount] = useState(0);
-  const [cursorVisible, setCursorVisible] = useState(true);
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const isReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const [displayedCount, setDisplayedCount] = useState<number>(() => isReducedMotion ? FULL_TEXT.length : 0);
+  const [cursorVisible, setCursorVisible] = useState<boolean>(() => !isReducedMotion);
+  const [isTypingComplete, setIsTypingComplete] = useState<boolean>(() => isReducedMotion);
 
   const heroPinRef = useRef<HTMLDivElement>(null);
-  const truckContainerRef = useRef<HTMLDivElement>(null);
-  const roadRef = useRef<HTMLDivElement>(null);
-  const frontWheelRef = useRef<SVGGElement>(null);
-  const rearWheelRef = useRef<SVGGElement>(null);
+  const largeTruckRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
-  // 1. Character-by-character typing animation
+  // 1. Character-by-character typing animation with clean unmount handling
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) {
-      setDisplayedCount(FULL_TEXT.length);
-      setIsTypingComplete(true);
-      setCursorVisible(false);
-      return;
-    }
+    if (isReducedMotion) return;
 
     let currentIndex = 0;
+    let cursorTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const typingInterval = setInterval(() => {
       currentIndex += 1;
       setDisplayedCount(currentIndex);
@@ -39,101 +33,106 @@ export const HeroSection: React.FC = () => {
       if (currentIndex >= FULL_TEXT.length) {
         clearInterval(typingInterval);
         setIsTypingComplete(true);
-        setTimeout(() => {
+        cursorTimeout = setTimeout(() => {
           setCursorVisible(false);
         }, 450);
       }
     }, 80);
 
-    return () => clearInterval(typingInterval);
-  }, []);
+    return () => {
+      clearInterval(typingInterval);
+      if (cursorTimeout) clearTimeout(cursorTimeout);
+    };
+  }, [isReducedMotion]);
 
-  // 2. GSAP ScrollTrigger for pinned scroll-driven truck travel & wheel rotation
+  // 2. GSAP ScrollTrigger for large faded truck right-to-left journey across hero section
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
     const heroSection = heroPinRef.current;
-    const truckEl = truckContainerRef.current;
-    const roadEl = roadRef.current;
-    if (!heroSection || !truckEl || !roadEl) return;
+    const truckEl = largeTruckRef.current;
+    if (!heroSection || !truckEl) return;
 
-    // Calculate dynamic travel distance across the viewport
-    const calculateDistance = () => {
+    // For reduced motion users, present as an elegant static faded background
+    if (isReducedMotion) {
+      gsap.set(truckEl, { x: 0 });
+      return;
+    }
+
+    const calculatePositions = () => {
       const viewportWidth = window.innerWidth;
-      const truckWidth = truckEl.offsetWidth || 160;
-      const margin = Math.max(24, viewportWidth * 0.05);
-      return Math.max(200, viewportWidth - truckWidth - margin * 2);
+      const truckWidth = truckEl.offsetWidth || 1100;
+      // Positioned just outside/near right edge so front cab enters seamlessly on scroll
+      const startX = viewportWidth * 0.85;
+      // Complete exit through left edge: rear of truck completely clears left viewport boundary
+      const endX = -(truckWidth + 80);
+      return { startX, endX };
     };
 
-    let travelDistance = calculateDistance();
+    let { startX, endX } = calculatePositions();
 
-    // Wheel diameter in SVG is 18 units; SVG width is 160.
-    const svgWheelDiameter = 18;
-    const svgWidth = 160;
-    const renderedTruckWidth = truckEl.offsetWidth || 160;
-    const renderedWheelDiameter = (svgWheelDiameter / svgWidth) * renderedTruckWidth;
-    const wheelCircumference = Math.PI * renderedWheelDiameter;
-    const totalWheelRotations = travelDistance / wheelCircumference;
-    const totalRotationDeg = totalWheelRotations * 360;
+    // Set initial stationary position outside/near right edge during typing
+    gsap.set(truckEl, { x: startX });
 
-    // GSAP Timeline synchronized with ScrollTrigger
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: heroSection,
           start: 'top top',
-          end: '+=150%',
-          pin: true,
-          scrub: 1, // Fluid momentum damping
-          anticipatePin: 1,
+          end: 'bottom top', // Smooth journey as hero scrolls towards About section
+          scrub: 1.2, // Premium fluid momentum
           invalidateOnRefresh: true,
           onRefresh: () => {
-            travelDistance = calculateDistance();
+            const pos = calculatePositions();
+            startX = pos.startX;
+            endX = pos.endX;
           },
         },
       });
 
-      // Move vehicle from right toward left
-      tl.to(truckEl, {
-        x: () => -travelDistance,
-        ease: 'none',
-        duration: 1,
-      }, 0);
-
-      // Rotate tires purely around their own local (0, 0) axle center via SVG transform attribute
-      const wheelState = { angle: 0 };
-      tl.to(wheelState, {
-        angle: -totalRotationDeg,
-        ease: 'none',
-        duration: 1,
-        onUpdate: () => {
-          const rotAttr = `rotate(${wheelState.angle})`;
-          if (frontWheelRef.current) {
-            frontWheelRef.current.setAttribute('transform', rotAttr);
-          }
-          if (rearWheelRef.current) {
-            rearWheelRef.current.setAttribute('transform', rotAttr);
-          }
+      // Move large truck smoothly from right to left, completely exiting left
+      tl.fromTo(
+        truckEl,
+        { x: () => startX },
+        {
+          x: () => endX,
+          ease: 'none',
+          duration: 1,
         },
-      }, 0);
+        0
+      );
 
       // Fade out the scroll prompt indicator on initial scroll
       if (scrollIndicatorRef.current) {
-        tl.to(scrollIndicatorRef.current, {
-          opacity: 0,
-          y: 10,
-          duration: 0.2,
-          ease: 'power1.out',
-        }, 0);
+        tl.to(
+          scrollIndicatorRef.current,
+          {
+            opacity: 0,
+            y: 10,
+            duration: 0.2,
+            ease: 'power1.out',
+          },
+          0
+        );
       }
     }, heroPinRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [isReducedMotion]);
 
   return (
     <section id="hero" className="hero-stage" ref={heroPinRef}>
+      {/* Background Large Faded Truck Layer (Z-Index 1, behind hero text) */}
+      <div className="hero-large-truck-layer" aria-hidden="true">
+        <div className="hero-large-truck-wrapper" ref={largeTruckRef}>
+          <img
+            src={hgtTruckLarge}
+            alt="Hyderabad Goa Transport Line-Haul Vehicle"
+            className="hero-large-truck-img"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+      </div>
+
       <div className="container hero-stage__content">
         {/* Subtle Eyebrow */}
         <div className="hero-stage__eyebrow">
@@ -169,31 +168,14 @@ export const HeroSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Pinned Road & Vehicle Journey Track */}
-      <div className="hero-track">
-        {/* Continuous Hairline Road */}
-        <div className="hero-track__road" ref={roadRef}>
-          <div className="hero-track__road-line"></div>
-        </div>
-
-        {/* Scroll-Driven Illustrated Cargo Vehicle */}
-        <div className="hero-track__truck-wrapper" ref={truckContainerRef}>
-          <TruckAsset
-            className="hero-track__truck-svg"
-            frontWheelRef={frontWheelRef}
-            rearWheelRef={rearWheelRef}
-          />
-        </div>
-
-        {/* Interactive Scroll Indicator */}
-        <div
-          ref={scrollIndicatorRef}
-          className={`hero-track__scroll-hint ${isTypingComplete ? 'is-ready' : ''}`}
-        >
-          <span className="scroll-hint-label">Scroll to journey</span>
-          <div className="scroll-hint-line">
-            <span className="scroll-hint-dot"></span>
-          </div>
+      {/* Interactive Scroll Indicator */}
+      <div
+        ref={scrollIndicatorRef}
+        className={`hero-scroll-hint ${isTypingComplete ? 'is-ready' : ''}`}
+      >
+        <span className="scroll-hint-label">Scroll to journey</span>
+        <div className="scroll-hint-line">
+          <span className="scroll-hint-dot"></span>
         </div>
       </div>
     </section>

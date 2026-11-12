@@ -1,9 +1,9 @@
 import React from 'react';
 import './Footer.css';
 
-export const Footer: React.FC = () => {
-  const currentYear = new Date().getFullYear();
+const CURRENT_YEAR = new Date().getFullYear();
 
+export const Footer: React.FC = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -68,7 +68,7 @@ export const Footer: React.FC = () => {
 
         <div className="footer-bottom">
           <p className="footer-copyright">
-            © {currentYear} Hyderabad Goa Transport. All rights reserved. Commercial Carriage & Freight Line.
+            © {CURRENT_YEAR} Hyderabad Goa Transport. All rights reserved. Commercial Carriage & Freight Line.
           </p>
           <button
             type="button"

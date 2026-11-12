@@ -118,7 +118,7 @@
   .corridor-node__connector {
     height: 1.5px;
     left: 16px;
-    right: 0;
+    right: -24px;
     top: 7.25px;
   }
 }

@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './ContactSection.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const ContactSection: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -7,13 +11,50 @@ export const ContactSection: React.FC = () => {
     phone: '',
     email: '',
     cargoType: 'Full Truckload (FTL)',
-    origin: 'Hyderabad, Telangana',
-    destination: 'Goa (Panaji / Vasco / Madgaon)',
+    corridorRoute: 'Hyderabad → Goa',
     notes: '',
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isReduced) return;
+
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const ctx = gsap.context(() => {
+      gsap.from('.contact-details > *', {
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%',
+          once: true,
+        },
+        opacity: 0,
+        y: 24,
+        duration: 0.7,
+        stagger: 0.1,
+        ease: 'power2.out',
+      });
+
+      gsap.from('.contact-form-container', {
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%',
+          once: true,
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.75,
+        ease: 'power2.out',
+      });
+    }, el);
+
+    return () => ctx.revert();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -29,13 +70,13 @@ export const ContactSection: React.FC = () => {
   const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Gaganpahad+Shamshabad+Hyderabad';
   const whatsappUrl = `https://wa.me/919849302205?text=${encodeURIComponent(
     formData.name
-      ? `Hello Hyderabad Goa Transport, I am ${formData.name}. I would like to inquire about ${formData.cargoType} (${formData.origin}). Direct contact: ${formData.phone}. Notes: ${formData.notes || 'None'}`
+      ? `Hello Hyderabad Goa Transport, I am ${formData.name}. I would like to inquire about ${formData.cargoType} (Route: ${formData.corridorRoute}). Direct contact: ${formData.phone}. Consignment Notes: ${formData.notes || 'None'}`
       : 'Hello Hyderabad Goa Transport, I would like to book cargo transport on the Hyderabad-Goa route.'
   )}`;
   const mailtoUrl = `mailto:${emailRecipient}?subject=${encodeURIComponent(
     `Cargo Transport Inquiry - ${formData.name || 'Freight Consignment'}`
   )}&body=${encodeURIComponent(
-    `Consignor Name / Organization: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email || 'N/A'}\nService Type: ${formData.cargoType}\nCorridor Route: ${formData.origin}\nNotes & Tonnage: ${formData.notes || 'N/A'}\n`
+    `Consignor Name / Organization: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email || 'N/A'}\nService Type: ${formData.cargoType}\nCorridor Route: ${formData.corridorRoute}\nConsignment Notes & Tonnage: ${formData.notes || 'N/A'}\n`
   )}`;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -49,7 +90,7 @@ export const ContactSection: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="section contact-section">
+    <section id="contact" className="section contact-section" ref={sectionRef}>
       <div className="container">
         <div className="contact-grid">
           {/* Left Column: Direct Inquiries & Hub Information */}
@@ -119,7 +160,7 @@ export const ContactSection: React.FC = () => {
                 <div className="success-icon">✓</div>
                 <h3 className="success-title">Inquiry Prepared</h3>
                 <p className="success-desc">
-                  Thank you, <strong>{formData.name}</strong>. Your consignment request for <strong>{formData.cargoType}</strong> is ready. Connect directly with our dispatch supervisor via email or WhatsApp below:
+                  Thank you, <strong>{formData.name}</strong>. Your consignment request for <strong>{formData.cargoType}</strong> along the <strong>{formData.corridorRoute}</strong> corridor is ready. Connect directly with our dispatch supervisor via email or WhatsApp below:
                 </p>
 
                 <div className="success-action-buttons">
@@ -155,8 +196,7 @@ export const ContactSection: React.FC = () => {
                       phone: '',
                       email: '',
                       cargoType: 'Full Truckload (FTL)',
-                      origin: 'Hyderabad, Telangana',
-                      destination: 'Goa (Panaji / Vasco / Madgaon)',
+                      corridorRoute: 'Hyderabad → Goa',
                       notes: '',
                     });
                   }}
@@ -236,14 +276,14 @@ export const ContactSection: React.FC = () => {
                     <label htmlFor="inquiry-origin" className="field-label">Corridor Direction</label>
                     <select
                       id="inquiry-origin"
-                      name="origin"
-                      value={formData.origin}
+                      name="corridorRoute"
+                      value={formData.corridorRoute}
                       onChange={handleChange}
                       className="field-select"
                     >
-                      <option value="Hyderabad, Telangana">Hyderabad → Goa</option>
-                      <option value="Goa to Hyderabad">Goa → Hyderabad</option>
-                      <option value="Intermediate Corridor">En-Route Station (Hubballi / Belagavi)</option>
+                      <option value="Hyderabad → Goa">Hyderabad → Goa</option>
+                      <option value="Goa → Hyderabad">Goa → Hyderabad</option>
+                      <option value="En-Route Station (Hubballi / Belagavi)">En-Route Station (Hubballi / Belagavi)</option>
                     </select>
                   </div>
                 </div>
